@@ -1,0 +1,101 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Aegis — Parametric Cover, Settled by Consensus</title>
+<!-- Stack: Vanta.js FOG (hero bg) + vanilla-tilt (policy cards) + GSAP reveals · Clash Display + General Sans -->
+<link rel="stylesheet" href="./styles.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/duotone/style.css">
+<link rel="stylesheet" href="https://unpkg.com/@phosphor-icons/web@2.1.1/src/bold/style.css">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r134/three.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vanta/0.5.24/vanta.fog.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-tilt/1.8.1/vanilla-tilt.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+</head>
+<body>
+<div class="wrap">
+  <nav class="nav">
+    <div class="nav-inner">
+      <div class="brand">
+        <i class="ph-bold ph-shield-check" style="font-size:26px;color:var(--navy)"></i>
+        Aegis
+      </div>
+      <div class="nav-links">
+        <a href="#book">The Book</a>
+        <a href="#how">How it works</a>
+        <a href="https://docs.genlayer.com/" target="_blank" rel="noopener">GenLayer</a>
+        <span id="walletslot"><button class="btn sm" id="connectBtn">Connect<span class="ic" data-icon="arrowRight"></span></button></span>
+      </div>
+    </div>
+  </nav>
+
+  <header class="hero">
+    <div id="vanta"></div>
+    <div class="hero-inner">
+      <span class="eyebrow"><span class="pip"></span> Parametric cover · self-adjudicating</span>
+      <h1 class="disp">Insurance that <em>pays itself</em> when the data says so.</h1>
+      <p>Underwriters lock coverage and name a public data source. When a holder files a claim, the contract reads that source live and a validator set agrees whether the trigger fired. Valid claims pay out automatically — no adjuster, no delay, no dispute.</p>
+      <div class="hero-cta">
+        <button class="btn mint" id="underwriteBtn">Underwrite a policy <span class="ic" data-icon="shield"></span></button>
+        <a class="btn ghost" href="#book">Browse the book</a>
+      </div>
+      <div class="hero-stats">
+        <div class="hstat"><div class="v disp" id="statCount">—</div><div class="l">Policies on book</div></div>
+        <div class="hstat"><div class="v disp" id="statCov">—</div><div class="l">GEN coverage escrowed</div></div>
+        <div class="hstat"><div class="v disp">0</div><div class="l">Human adjusters</div></div>
+      </div>
+    </div>
+  </header>
+
+  <section id="book" class="reveal">
+    <div class="feature-band reveal">
+      <figure class="fb-img">
+        <img src="https://picsum.photos/seed/aegis-storm-radar/920/520" alt="Live data triggers" loading="lazy" />
+      </figure>
+      <div class="fb-text">
+        <span class="eyebrow"><span class="pip"></span> Parametric trigger</span>
+        <h3 class="disp">One data point. Automatic payout.</h3>
+        <p>No claim forms. No adjusters. The contract monitors a named public source; when the trigger fires, coverage moves instantly. The only oracle is the data itself, verified by consensus.</p>
+        <ul class="fb-list">
+          <li><i class="ph-bold ph-lightning"></i> Triggers from any public URL</li>
+          <li><i class="ph-bold ph-users-three"></i> Validators must independently agree</li>
+          <li><i class="ph-bold ph-currency-circle-dollar"></i> Pays in the same block</li>
+        </ul>
+      </div>
+    </div>
+    <div class="sec-head">
+      <div><span class="eyebrow">The book</span><h2 class="disp" style="margin-top:12px">Policies in force</h2>
+        <p>Tilt a card to inspect it. Claims are settled from live data by validator consensus.</p></div>
+      <button class="btn ghost sm" id="refreshBtn">Refresh<span class="ic" data-icon="refresh"></span></button>
+    </div>
+    <div class="book" id="grid"><div class="empty">Opening the book…</div></div>
+  </section>
+
+  <section id="how" class="reveal">
+    <div class="sec-head"><div><span class="eyebrow">Mechanism</span><h2 class="disp" style="margin-top:12px">How a claim settles</h2></div></div>
+    <div class="accordion">
+      <div class="acc-item open"><button class="acc-head"><i class="ph-duotone ph-globe-hemisphere-west acc-ic"></i><span class="disp">Fetch</span><i class="ph-bold ph-caret-down acc-arrow"></i></button><div class="acc-body"><p>The contract reads the named public data source on-chain when a claim is filed. No intermediary touches the data.</p></div></div>
+      <div class="acc-item"><button class="acc-head"><i class="ph-duotone ph-users-three acc-ic"></i><span class="disp">Assess</span><i class="ph-bold ph-caret-down acc-arrow"></i></button><div class="acc-body"><p>Each validator independently judges whether the trigger condition is met. They cannot see each other's answers.</p></div></div>
+      <div class="acc-item"><button class="acc-head"><i class="ph-duotone ph-check-circle acc-ic"></i><span class="disp">Settle</span><i class="ph-bold ph-caret-down acc-arrow"></i></button><div class="acc-body"><p>They must agree via the Equivalence Principle. Then escrow pays the holder instantly, or returns to the underwriter.</p></div></div>
+    </div>
+  </section>
+
+  <footer>
+    <span>Aegis · parametric cover on GenLayer studionet</span>
+    <span class="links"><a href="https://docs.genlayer.com/" target="_blank" rel="noopener">Docs</a><a href="https://docs.genlayer.com/core-concepts/web-data-access" target="_blank" rel="noopener">Web Data Access</a><a href="https://studio.genlayer.com/" target="_blank" rel="noopener">Studio</a></span>
+    <span id="contractFoot"></span>
+  </footer>
+</div>
+
+<div class="scrim" id="scrim"></div>
+<aside class="drawer" id="drawer">
+  <div class="drawer-h"><h3 class="disp" id="drawerTitle">Underwrite a policy</h3><button class="btn ghost sm" id="closeDrawer">Close</button></div>
+  <div class="drawer-b" id="drawerBody"></div>
+</aside>
+
+<div id="log"></div>
+<script type="module" src="./app.js"></script>
+</body>
+</html>
