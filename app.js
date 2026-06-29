@@ -9,6 +9,15 @@ const STATUS = ["OFFERED", "ACTIVE", "PAID", "EXPIRED"], STLABEL = ["Available",
 let account = null, policies = [];
 const $ = (id) => document.getElementById(id);
 const esc = (s) => (s || "").replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c]));
+const weiOf = (v) => { try { return BigInt(v || "0"); } catch (_) { return 0n; } };
+const DISPLAY_DUST_WEI = 10n ** 15n; // below 0.001 GEN reads as a protocol proof, not a payout.
+const isDisplayZero = (v) => weiOf(v) < DISPLAY_DUST_WEI;
+const isProofPolicy = (p) => isDisplayZero(p.coverage) && isDisplayZero(p.premium);
+const statusBadge = (p, st) => {
+  if (isProofPolicy(p)) return ["b-proof", st === EXPIRED ? "Archived proof" : "Verified proof"];
+  return st === OFFERED ? ["b-off", "Available"] : st === ACTIVE ? ["b-act", "In force"] : st === PAID ? ["b-paid", "Paid out"] : ["b-exp", "Expired"];
+};
+const metricValue = (value, fallback) => isDisplayZero(value) ? fallback : `${toGen(value)} GEN`;
 
 $("contractFoot").innerHTML = `Contract ${short(CONTRACT)}`;
 setIcons();
@@ -51,15 +60,19 @@ function render() {
   g.innerHTML = "";
   [...policies].reverse().forEach((p) => {
     const st = Number(p.status);
-    const badge = st === OFFERED ? ["b-off", "Available"] : st === ACTIVE ? ["b-act", "In force"] : st === PAID ? ["b-paid", "Paid out"] : ["b-exp", "Expired"];
-    const el = document.createElement("div"); el.className = "policy";
+    const proof = isProofPolicy(p);
+    const badge = statusBadge(p, st);
+    const el = document.createElement("div"); el.className = `policy${proof ? " proof-policy" : ""}`;
     el.innerHTML = `<div class="core">
-      <span class="badge ${badge[0]}">${badge[1]}</span>
+      <div class="policy-top">
+        <span class="policy-kind">${proof ? "Protocol proof" : "Parametric cover"}</span>
+        <span class="badge ${badge[0]}">${badge[1]}</span>
+      </div>
       <h3 class="disp">${esc(p.title) || "Untitled cover"}</h3>
       <div class="trig">${esc(p.trigger)}</div>
       <div class="nums">
-        <div class="num"><div class="l">Coverage</div><div class="v cov">${toGen(p.coverage)} GEN</div></div>
-        <div class="num"><div class="l">Premium</div><div class="v">${toGen(p.premium)} GEN</div></div>
+        <div class="num"><div class="l">${proof ? "Scope" : "Coverage"}</div><div class="v cov">${metricValue(p.coverage, "Verified")}</div></div>
+        <div class="num"><div class="l">${proof ? "Settlement" : "Premium"}</div><div class="v">${metricValue(p.premium, "Audit only")}</div></div>
         <div class="num"><div class="l">Policy</div><div class="v">#${p.id}</div></div>
       </div></div>`;
     el.onclick = () => openDetail(p.id);
@@ -95,20 +108,21 @@ function openUnderwrite() {
 function openDetail(id) {
   const p = policies.find((x) => x.id === id); if (!p) return;
   const st = Number(p.status);
-  $("drawerTitle").textContent = (p.title || "Policy") + " · #" + id;
-  const cov = Number(BigInt(p.coverage)) / 1e18, prem = Number(BigInt(p.premium)) / 1e18;
+  const proof = isProofPolicy(p);
+  $("drawerTitle").textContent = (p.title || "Policy") + " - #" + id;
+  const cov = Number(weiOf(p.coverage)) / 1e18, prem = Number(weiOf(p.premium)) / 1e18;
   const lev = prem > 0 ? (cov / prem) : 0, premPct = (cov + prem) > 0 ? Math.max(4, prem / (cov + prem) * 100) : 50;
   let assess = "";
-  if (st === PAID) assess = `<div class="assess yes"><b style="color:#1f7a3d">Claim paid.</b> ${p.assessment ? "Validators: " + esc(p.assessment) : "Trigger met; coverage released to holder."}</div>`;
-  if (st === EXPIRED) assess = `<div class="assess no"><b>Claim assessed — trigger not met.</b> ${p.assessment ? "Validators: " + esc(p.assessment) : "Coverage returned to the underwriter."}</div>`;
+  if (st === PAID) assess = `<div class="assess yes"><b style="color:#1f7a3d">${proof ? "Proof verified." : "Claim paid."}</b> ${p.assessment ? "Validators: " + esc(p.assessment) : proof ? "Validators confirmed the source condition and stored the result on-chain." : "Trigger met; coverage released to holder."}</div>`;
+  if (st === EXPIRED) assess = `<div class="assess no"><b>Claim assessed - trigger not met.</b> ${p.assessment ? "Validators: " + esc(p.assessment) : "Coverage returned to the underwriter."}</div>`;
   let action = "";
-  if (st === OFFERED) action = `<button class="btn mint block" id="buyBtn">Buy cover · pay ${toGen(p.premium)} GEN <span class="ic">${icon("coins")}</span></button>`;
-  else if (st === ACTIVE) action = `<button class="btn block" id="claimBtn">File a claim · assess from data <span class="ic">${icon("spark")}</span></button><div class="hint" style="text-align:center;margin-top:8px">Reads the source; validators must agree. Calls a real LLM.</div>`;
+  if (st === OFFERED) action = `<button class="btn mint block" id="buyBtn">Buy cover - pay ${toGen(p.premium)} GEN <span class="ic">${icon("coins")}</span></button>`;
+  else if (st === ACTIVE) action = `<button class="btn block" id="claimBtn">File a claim - assess from data <span class="ic">${icon("spark")}</span></button><div class="hint" style="text-align:center;margin-top:8px">Reads the source; validators must agree. Calls a real LLM.</div>`;
   $("drawerBody").innerHTML = `
-    <div class="detail-ratio">
-      <div class="rr"><div class="big disp">${toGen(p.coverage)} <small>GEN coverage</small></div><div class="lev"><div class="x">${lev ? lev.toFixed(1) + "×" : "—"}</div><div class="lab">holder leverage</div></div></div>
+    <div class="detail-ratio${proof ? " proof-detail" : ""}">
+      <div class="rr"><div class="big disp">${proof ? "Verified" : toGen(p.coverage)} <small>${proof ? "protocol proof" : "GEN coverage"}</small></div><div class="lev"><div class="x">${proof ? "audit" : lev ? lev.toFixed(1) + "x" : "-"}</div><div class="lab">${proof ? "settlement mode" : "holder leverage"}</div></div></div>
       <div class="barwrap"><div class="prem" style="width:${premPct}%"></div><div class="cov"></div></div>
-      <div class="barlegend"><span>premium ${toGen(p.premium)} GEN</span><span>payout ${toGen(p.coverage)} GEN</span></div>
+      <div class="barlegend"><span>${proof ? "no premium charged" : "premium " + toGen(p.premium) + " GEN"}</span><span>${proof ? "no token payout" : "payout " + toGen(p.coverage) + " GEN"}</span></div>
     </div>
     ${assess}
     <div class="kv"><span class="k">Trigger</span><span class="v">${esc(p.trigger)}</span></div>
