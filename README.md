@@ -98,7 +98,7 @@ Aegis ships as a standalone static app:
 From the private workspace:
 
 ```powershell
-cd C:\Users\aspronim\Desktop\design-skills
+cd <private-workspace-root>
 npm run preview:start
 npm run preview:project -- 03-aegis
 ```
@@ -112,7 +112,7 @@ http://localhost:8080/03-aegis/
 ## Publish / Redeploy
 
 ```powershell
-cd C:\Users\aspronim\Desktop\design-skills
+cd <private-workspace-root>
 npm run publish:project -- -Project 03-aegis -Repo https://github.com/thorbh2/aegis.git
 ```
 
