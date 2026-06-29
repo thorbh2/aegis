@@ -1,4 +1,4 @@
-/* AEGIS — rebuilt. Soft-Structuralism fintech · Clash Display + General Sans
+/* AEGIS - rebuilt. Soft-Structuralism fintech · Clash Display + General Sans
    Vanta.js FOG hero background · vanilla-tilt policy cards · mint/navy on light */
 @import url("https://api.fontshare.com/v2/css?f[]=clash-display@500,600,700&f[]=general-sans@400,500,600&f[]=jetbrains-mono@400,500&display=swap");
 
@@ -73,7 +73,7 @@ section{padding:46px 0}
 .sec-head h2{font-family:"Clash Display";font-weight:600;font-size:clamp(28px,3.6vw,40px);letter-spacing:-.02em}
 .sec-head p{color:var(--ink2);max-width:42ch;margin-top:6px}
 
-/* policy book — tilt cards (double bezel) */
+/* policy book - tilt cards (double bezel) */
 .book{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,360px),1fr));gap:22px;align-items:stretch}
 .policy{background:var(--bg2);border:1px solid var(--line);border-radius:var(--r);padding:7px;box-shadow:var(--shadow-sm);cursor:pointer;transform-style:preserve-3d;transition:box-shadow .4s,transform .4s}
 .policy:hover{box-shadow:var(--shadow)}

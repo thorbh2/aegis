@@ -100,7 +100,7 @@ function openUnderwrite() {
       <div class="live-ratio"><span>Holder leverage</span><span><b id="liveLev">10.0×</b> · break-even <span id="liveBe">9%</span></span></div></div>
     <button class="btn mint block" id="createBtn">Lock coverage & list <span class="ic">${icon("shield")}</span></button>`;
   $("createBtn").onclick = doCreate;
-  const upd = () => { const c = parseFloat($("coverage").value) || 0, pr = parseFloat($("premium").value) || 0; $("liveLev").textContent = pr > 0 ? (c / pr).toFixed(1) + "×" : "—"; $("liveBe").textContent = (c + pr) > 0 ? Math.round(pr / (c + pr) * 100) + "%" : "—"; };
+  const upd = () => { const c = parseFloat($("coverage").value) || 0, pr = parseFloat($("premium").value) || 0; $("liveLev").textContent = pr > 0 ? (c / pr).toFixed(1) + "×" : "-"; $("liveBe").textContent = (c + pr) > 0 ? Math.round(pr / (c + pr) * 100) + "%" : "-"; };
   $("coverage").oninput = upd; $("premium").oninput = upd;
   openDrawer();
 }
